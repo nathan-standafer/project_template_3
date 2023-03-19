@@ -28,15 +28,12 @@ class StageToRedshiftOperator(BaseOperator):
 
     @apply_defaults
     def __init__(self,
-                 # Define your operators params (with defaults) here
-                 # Example:
-                 redshift_conn_id='redshift',
-                 aws_connection_credentials_id='aws_credentials',
+                 redshift_conn_id: str,
+                 aws_connection_credentials_id: str,
                  **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(**kwargs)
-        # Map params here
-        # Example:
+
         self.redshift_conn_id = redshift_conn_id
         self.aws_connection_credentials_id = aws_connection_credentials_id
 
