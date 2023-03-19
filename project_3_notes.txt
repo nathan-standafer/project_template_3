@@ -1,0 +1,12 @@
+copy s3 project data to my s3 bucket
+
+
+aws s3 cp s3://udacity-dend/log_data s3://nas-udacity-data-pipelines-2/log_data --recursive
+aws s3 cp s3://udacity-dend/song_data s3://nas-udacity-data-pipelines-2/song_data --recursive
+
+aws s3 ls s3://nas-udacity-data-pipelines-2/log_data/
+aws s3 ls s3://nas-udacity-data-pipelines-2/song_data/
+
+psql -h default.861542817957.us-east-1.redshift-serverless.amazonaws.com -d dev -p 5439 -U awsuser
+
+created tables:   public.staging_events , public.staging_songs
