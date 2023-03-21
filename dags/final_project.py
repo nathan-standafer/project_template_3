@@ -11,11 +11,11 @@ from final_project_operators.data_quality import DataQualityOperator
 default_args = {
     'owner': 'nathan-standafer',
     'start_date': pendulum.now(),
-    'trigger_rule': 'always',               # The DAG does not have dependencies on past runs
     'retries': 3,                           # On failure, the task are retried 3 times
     'retry_delay': timedelta(minutes=5),    # Retries happen every 5 minutes
     'catchup': False,                       # Catchup is turned off
-    'email_on_retry': False                 # Do not email on retry
+    'email_on_retry': False,                # Do not email on retry
+    'depends_on_past': False                # The DAG does not have dependencies on past runs
 }
 
 @dag(
@@ -74,16 +74,26 @@ def final_project():
         full_delete_load=True
     )
 
+    quality_check_queries = {
+        'staging_events': 'select count(*) from staging_events',
+        'staging_songs': 'select count(*) from staging_songs',
+        'artists': 'select count(*) from artists',
+        'songplays': 'select count(*) from songplays',
+        'songs': 'select count(*) from songs',
+        'time': 'select count(*) from time',
+        'users': 'select count(*) from users'
+    }
+
     run_quality_checks = DataQualityOperator(
         redshift_conn_id='redshift',
         aws_connection_credentials_id='aws_credentials',
         task_id='Run_data_quality_checks',
+        quality_check_queries=quality_check_queries
     )
 
     end_operator = DummyOperator(task_id='End_execution')
 
-    start_operator >> stage_events_to_redshift
-    start_operator >> stage_songs_to_redshift
+    start_operator >> [stage_events_to_redshift, stage_songs_to_redshift]
 
     stage_events_to_redshift >> load_songplays_table
     stage_songs_to_redshift  >> load_songplays_table
